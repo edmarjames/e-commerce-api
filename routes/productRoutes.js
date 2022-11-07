@@ -13,9 +13,17 @@ router.get("/", (req, res) => {
 	.catch(controllerError => res.send(controllerError));
 });
 
-
 router.get("/active", (req, res) => {
 	productController.getActiveProducts()
+	.then(controllerResult => res.send(controllerResult))
+	.catch(controllerError => res.send(controllerError));
+});
+
+router.get("/all-orders", auth.verify, (req, res) => {
+
+	const userData = auth.decode(req.headers.authorization);
+
+	productController.getAllOrders({isAdmin: userData.isAdmin})
 	.then(controllerResult => res.send(controllerResult))
 	.catch(controllerError => res.send(controllerError));
 });
@@ -24,7 +32,7 @@ router.get("/:productId", (req, res) => {
 	productController.getSingleProduct(req.params)
 	.then(controllerResult => res.send(controllerResult))
 	.catch(controllerError => res.send(controllerError));
-})
+});
 
 router.post("/add", auth.verify, (req, res) => {
 	const data = {

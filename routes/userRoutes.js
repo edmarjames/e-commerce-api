@@ -27,7 +27,7 @@ router.get("/profile", auth.verify, (req, res) => {
 	.catch(controllerError => res.send(controllerError));
 });
 
-router.post("/add-to-cart", auth.verify, (req, res) => {
+router.post("/add-to-cart", (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
 		order: req.body,
@@ -50,7 +50,7 @@ router.get("/cart", auth.verify, (req, res) => {
 router.get("/cart/paid", (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 
-	userController.getPaidOrders({userId: userData.id})
+	userController.getMyOrders({userId: userData.id})
 	.then(controllerResult => res.send(controllerResult))
 	.catch(controllerError => res.send(controllerError));
 });
@@ -67,6 +67,18 @@ router.put("/cart/remove/:orderId", auth.verify, (req, res) => {
 	.catch(controllerError => res.send(controllerError));
 });
 
+router.put("/cart/remove-product/:productOrderId", (req, res) => {
+	const userData = auth.decode(req.headers.authorization);
+	const data = {
+		order: req.params,
+		userId: userData.id
+	}
+
+	userController.removeProductFromCart(data)
+	.then(controllerResult => res.send(controllerResult))
+	.catch(controllerError => res.send(controllerError));
+});
+
 router.patch("/cart/update-quantity", auth.verify, (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
@@ -79,7 +91,7 @@ router.patch("/cart/update-quantity", auth.verify, (req, res) => {
 	.catch(controllerError => res.send(controllerError));
 });
 
-router.patch("/cart/checkout", auth.verify, (req, res) => {
+router.post("/cart/checkout", auth.verify, (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
 		order: req.body,
@@ -87,15 +99,6 @@ router.patch("/cart/checkout", auth.verify, (req, res) => {
 	};
 
 	userController.checkOutOrder(data)
-	.then(controllerResult => res.send(controllerResult))
-	.catch(controllerError => res.send(controllerError));
-});
-
-router.get("/all-orders", auth.verify, (req, res) => {
-
-	const userData = auth.decode(req.headers.authorization);
-
-	userController.getAllOrders({isAdmin: userData.isAdmin})
 	.then(controllerResult => res.send(controllerResult))
 	.catch(controllerError => res.send(controllerError));
 });

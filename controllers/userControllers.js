@@ -87,129 +87,123 @@ module.exports.getProfile = (data) => {
 
 
 // Controller for adding a product to the cart
-module.exports.addToCart = (data) => {
+module.exports.addToCart = async (data) => {
 
-	// Find the product details using it's ID
-	return Product.findById(data.order.productId).then((productResult, err) => {
-		if (err) {
-			// Throws an error if the product does not exists on the database
-			// console.log("check");
-			return Promise.reject("Product does not exists");
-		} else {
-			// Checks if the product is active
-			if (productResult.isActive === false) {
-				return Promise.reject("Product is out of stock!");
+	let price = [];
+	let totalAmount = [];
+	const newProduct = {
+		products: data.order
+	};
+	
+	for (let orders of data.order) {
+
+		await Product.findById(orders.productId).then((result, err) => {
+			if (err) {
+				console.error(err);
 			} else {
-				// Create a new order based from the request body. Product name will be auto populated based from the first query on the products collection
-				let productObj = {
-						productId: data.order.productId,
-						productName: productResult.name,
-						quantity: data.order.quantity	
-				};
-				const newProduct = {
-					products: [],
-					totalAmount: (productResult.price * data.order.quantity)
-				};
-				newProduct.products.push(productObj);
-				console.log(newProduct);
+				price.push(result.price);
+			}
+		});
+	}
 
-				// Finds the authenticated user using it's ID and filter the necessary fields only
-				return User.findById({_id: data.userId}, {email: 0, password: 0, isAdmin: 0, mobileNo: 0}).then((user, err) => {
-					if (err) {
-						// Throws an error if the user cannot be find on the database
-						console.error(err);
-					} else {
-						// Push the new order to the order array on the user collection
-						user.orders.push(newProduct);
-					
-						// Save the changes on the order array of the user
-						return user.save().then((orderResult, err) => {
-							if (err) {
-								// Throws an error if changes cannot be saved
-								console.error(err);
-							} else {
-								// Returns the message and the added product
-								const data = {
-									message: "Product is added to your cart",
-									details: orderResult
-								}
-								return data;
-							};
-						});
-					};
-				});
-			};
-		};
+	for (let ctr1 = 0, ctr = 0; ctr1 < price.length, ctr < data.order.length; ctr1++, ctr++) {
+		totalAmount.push(newProduct.products[ctr].quantity * price[ctr1]);
+	}
+	newProduct.totalAmount = totalAmount.reduce((x, y) => x + y);
+
+	return User.findById(data.userId).then((userResult, err) => {
+		if (err) {
+			console.error(err);
+		} else {
+			userResult.orders.push(newProduct);
+			return userResult.save().then((saveResult, err) => {
+				if (err) {
+					console.error(err);
+				} else {
+					const data = {
+						message: "Items added to cart",
+						result: userResult.orders.slice(-1)
+					}
+					return data;
+				}
+			});
+		}
 	});
-};
+}
 // End of addToCart controller
 
 
 // Controller for viewing the cart of the authenticated user
-module.exports.viewCart = (data) => {
+module.exports.viewCart = async (data) => {
+
+	const dataObj = {};
 
 	// Find the authenticated user using it's ID from the JSON web token
-	return User.findById(data.userId).then((orderResult, err) => {
+	await User.findById(data.userId).then((orderResult, err) => {
 		if (err) {
 			// Throws an error if the user cannot be find on the database
 			return Promise.reject(err);
 		} else {
-			// If the user exists, it will return all unpaid orders
-			const data = {
-				message: "My shopping cart",
-				cart: orderResult.orders
-			};
-			
-			let grandTotal = [];
-			for (let ctr = 0; ctr < orderResult.orders.length; ctr++) {
-				grandTotal.push(orderResult.orders[ctr].totalAmount);
-			};
-
-			// adds the Grand total to the data object
-			data.grandTotal = grandTotal.reduce((x, y) => x + y);
-			// returns the data object
-			return data;
-		};			
+			dataObj.cart = orderResult.orders;
+		};	
 	});
+
+	const resultObj = {
+		message: "My Shopping cart",
+		cart: []
+	};
+
+	for (let ctr = 0; ctr < dataObj.cart.length; ctr++) {
+		const productObj = {
+			products: []
+		};
+		let totalAmount = [];
+
+		for (let ctr1 = 0; ctr1 < dataObj.cart[ctr].products.length; ctr1++) {
+			await Product.findById(dataObj.cart[ctr].products[ctr1].productId).then((productResult, err) => {
+				if (err) {
+					console.error(err);
+				} else  {
+					let subtotals = dataObj.cart[ctr].products[ctr1].quantity * productResult.price;
+					totalAmount.push(subtotals);
+					productObj.products.push(
+						{
+							productId: dataObj.cart[ctr].products[ctr1].productId, 
+							name: productResult.name,
+							quantity: dataObj.cart[ctr].products[ctr1].quantity,
+							price: productResult.price,
+							subtotal: subtotals,
+							_id: dataObj.cart[ctr].products[ctr1]._id
+						}
+					);
+				};
+			});
+		};
+		productObj.totalAmount = totalAmount.reduce((x, y) => x + y);
+		productObj.purchasedOn = dataObj.cart[ctr].purchasedOn;
+		productObj.id = dataObj.cart[ctr]._id;
+		resultObj.cart.push(productObj);
+	};
+	return resultObj;
 };
 // End of viewCart controller
 
 
-// Controller for viewing the order history of the authenticated user
-module.exports.getPaidOrders = (data) => {
-	// Find the authenticated user using it's ID from the JSON web token
-	return User.findById(data.userId).then((orderResult, err) => {
+// Controller for getting all the paid orders of the user
+module.exports.getMyOrders = (data) => {
+	return Product.find({"order.userId": data.userId}, {isActive: 0, createdOn: 0, "order.userId": 0}).then((result, err) => {
 		if (err) {
-			// Throws an error if the user cannot be find on the database
-			return Promise.reject(err);
+			console.error(err);
 		} else {
-			// If the user exists, it will return all paid orders
 			const data = {
-				message: "Order History",
-				name: `${orderResult.firstName} ${orderResult.lastName}`,
-				transaction: []
-			};
-
-			// Logic to get the subtotal of orders and the total amount of all orders
-			const total = [];
-			for (let ctr = 0; ctr < orderResult.order.length; ctr++) {
-				if (orderResult.order[ctr].isPaid == true) {
-					let subtotals = (orderResult.order[ctr].price * orderResult.order[ctr].quantity);
-					data.transaction.push({orders: orderResult.order[ctr], subtotal: subtotals});
-					total.push(subtotals);
-				} else {
-					continue;
-				}
-			};
-
-			// adds the total to the data array
-			data.total = total.reduce((x, y) => x + y);
-			// returns the data object
+				message: "Paid orders",
+				orders: result
+			}
 			return data;
-		}			
+		}
 	});
 };
-// End of getPaidOrders controller
+// End of getMyOrders controller
 
 
 // Controller to remove an order from the cart
@@ -235,7 +229,7 @@ module.exports.removeOrderFromCart = (data) => {
 						} else {
 							// Returns the message and the removed order
 							const data = {
-								message: "Item successfully removed from cart",
+								message: "Items successfully removed from cart",
 								result: spliceResult
 							};
 							return data;
@@ -253,6 +247,49 @@ module.exports.removeOrderFromCart = (data) => {
 // End of removeOrderfromCart controller
 
 
+// Controller for removing a product from cart
+module.exports.removeProductFromCart = (data) => {
+	// Find the authenticated user using it's ID from the JSON web token
+	return User.findById(data.userId).then((result, err) => {
+		if (err) {
+			// Throws an error if the user cannot be find on the database
+			return Promise.reject(err);
+		} else {
+			// If the user is found, this will loop through the order array of the user to get the exact order matching the orderId provided from the request body
+			// Get the index of the found order on the array and remove it from the array using splice
+			for (let ctr = 0; ctr < result.orders.length; ctr++) {
+				for (let ctr1 = 0; ctr1 < result.orders[ctr].products.length; ctr1++) {
+					if(data.order.productOrderId == result.orders[ctr].products[ctr1]._id) {
+						let index = result.orders[ctr].products.indexOf(result.orders[ctr].products[ctr1]);
+						let spliceResult = result.orders[ctr].products.splice(index, 1);
+
+					// Save changes on the order array
+					return result.save().then((saveResult, err) => {
+						if (err) {
+							// Throws and error if the changes cannot be saved
+							return Promise.reject("Failed to remove item");
+						} else {
+							// Returns the message and the removed order
+							const data = {
+								message: "Product successfully removed from cart",
+								result: spliceResult
+							};
+							return data;
+						};
+					});
+					
+					} else {
+						// Continue on the loop if the orderId from the request body and order array did not match
+						continue;
+					};
+				}
+			};
+		};
+	});
+};
+// End of removeProductFromCart controller
+
+
 // Controller to update the quantity of the order
 module.exports.updateOrderQuantity = (data) => {
 	// Find the authenticated user using it's ID from the JSON web token
@@ -263,19 +300,12 @@ module.exports.updateOrderQuantity = (data) => {
 		} else {
 			// If the user is found, this will loop through the order array of the user to get the exact order matching the orderId provided from the request body
 			// Updates the quantity of the order based on the quantity provided from the request body
-			for (let ctr = 0; ctr < result.orders.length; ctr++) {
-				if(data.order.orderId == result.orders[ctr]._id) {
-					console.log(data.order.orderId);
-					console.log(result.orders[ctr]._id);
-					result.orders[ctr].products[ctr].quantity = data.order.quantity;
-					return Product.findOne({name: result.orders[ctr].products[ctr].productName}).then((productResult, err) => {
-						if (err) {
-							console.error(err);
-						} else {
-							result.orders[ctr].totalAmount = (data.order.quantity * productResult.price);
-						}
 
-						// Save changes on the order array
+			for (let counter = 0; counter < result.orders.length; counter++) {
+				for (let ctr = 0; ctr < result.orders[counter].products.length; ctr++) {
+					if (data.order.orderId == result.orders[counter].products[ctr]._id) {
+						result.orders[counter].products[ctr].quantity = data.order.quantity;
+
 						return result.save().then((saveResult, err) => {
 							if (err) {
 								// Throws and error if the changes cannot be saved
@@ -284,17 +314,16 @@ module.exports.updateOrderQuantity = (data) => {
 								// Returns the message and the updated order
 								const data = {
 									message: "Quantity successfully updated",
-									result: result.orders[ctr]
+									result: result.orders[counter].products[ctr]
 								};
 								return data;
 							};
 						});
-					});
-				} else {
-					// Continue on the loop if the orderId from the request body and order array did not match
-					continue;
+					} else {
+						continue;
+					};	
 				};
-			};
+			}; 
 		};
 	});
 };
@@ -302,7 +331,7 @@ module.exports.updateOrderQuantity = (data) => {
 
 
 // Controller for checking out an item from the cart
-module.exports.checkOutOrder = (data) => {
+/*module.exports.checkOutOrder = (data) => {
 	// Find the authenticated user using it's ID from the JSON web token
 	return User.findById(data.userId).then((result, err) => {
 		if (err) {
@@ -313,30 +342,50 @@ module.exports.checkOutOrder = (data) => {
 			if (data.order.length === undefined) {
 
 				// This will loop through the order array of the user and mark the matched order as paid
-				for (let ctr = 0; ctr < result.order.length; ctr++) {
-					if(data.order.orderId == result.order[ctr]._id) {
-						result.order[ctr].isPaid = true;
+				for (let ctr = 0; ctr < result.orders.length; ctr++) {
 
-						// Save the changes on the order array
-						return result.save().then((saveResult, err) => {
-							if (err) {
-								// Throws and error if the changes cannot be saved
-								return Promise.reject("Failed to checkout");
-							} else {
-								// Create a data object to store all the results
-								const data = {
-									message: "Items successfully checkout",
-									result: result.order[ctr]
-								}
+					if(data.order.orderId == result.orders[ctr]._id) {
 
-								// Logic for getting the total amount of order
-								let subtotals = (result.order[ctr].price * result.order[ctr].quantity);
-								data.total = subtotals;
+						for (let counter = 0; counter < result.orders[ctr].products.length; counter++) {
 
-								// Returns the message and the orders paid successfully
-								return data;
-							};
-						});
+							return Product.findById(result.orders[ctr].products[counter].productId).then((productResult, err) => {
+								if (err) {
+									console.error(err);
+								} else {
+									let newProductOrder = {
+										orderId: result.orders[ctr]._id,
+										userId: data.userId,
+										quantity: result.orders[ctr].products[counter].quantity
+									}
+
+									productResult.order.push(newProductOrder);
+
+									return productResult.save().then((productSaveResult, err) => {
+										if (err) {
+											console.error(err);
+										} else {
+
+											let index = result.orders.indexOf(result.orders[ctr]);
+											let spliceResult = result.orders.splice(index, 1);
+
+											// Save the changes on the orders array
+											return result.save().then((userSaveResult, err) => {
+												if (err) {
+													// Throws and error if the changes cannot be saved
+													return Promise.reject("Failed to checkout");
+												} else {
+													const data = {
+														message: "Items successfully checkout"
+													};
+													data.result = spliceResult;
+													return data;
+												};
+											});
+										};
+									}); 
+								};
+							});
+						};
 					} else {
 						// Continue on the loop if the orderId from the request body and order array did not match
 						continue;
@@ -385,34 +434,91 @@ module.exports.checkOutOrder = (data) => {
 			};
 		};
 	});
-
-};
+};*/
 // End of checkOutOrder controller
 
+module.exports.checkOutOrder = async (data) => {
 
-// Controller for getting all orders
-module.exports.getAllOrders = (data) => {
-	// Checks if the authenticated user is an admin
-	if (data.isAdmin) {
-		// Get all the users and filter the necessary fields
-		return User.find({isAdmin: false}, {email: 1, orders: 1}).then((searchResult, err) => {
+	let orderId;
+	let orderDetails = [];
+
+	// Find the authenticated user using it's ID from the JSON web token
+	await User.findById(data.userId).then((result, err) => {
+		if (err) {
+			// Throws an error if the user cannot be find on the database
+			return Promise.reject(err);
+		} else {
+
+			// This will loop through the order array of the user and mark the matched order as paid
+			for (let ctr = 0; ctr < result.orders.length; ctr++) {
+				if(data.order.orderId == result.orders[ctr]._id) {
+					for (let counter = 0; counter < result.orders[ctr].products.length; counter++) {
+						orderId = result.orders[ctr]._id;
+						/*productId.push(result.orders[ctr].products[counter].productId);
+						quantity.push(result.orders[ctr].products[counter].quantity);*/
+
+						// console.log(result.orders[ctr].products[counter]);
+						orderDetails.push(result.orders[ctr].products[counter]);
+					};
+				} else {
+					// Continue on the loop if the orderId from the request body and order array did not match
+					continue;
+				};
+			};
+		};
+	});
+
+	const dataResult = {};
+
+	for (order of orderDetails) {
+
+		await Product.findById(order.productId).then((productResult, err) => {
 			if (err) {
-				console.error(err);
+				console.log(err);
 			} else {
-				// Returns the message and orders of all users
-				const data = {
-					message: "All orders",
-					result: searchResult
+				let newProductOrder = {
+					orderId: orderId,
+					userId: data.userId,
+					quantity: order.quantity
 				}
-				return data;
+
+				productResult.order.push(newProductOrder);
+				productResult.save().then((productSaveResult, err) => {
+					if (err) {
+						console.error(err);
+					} else {
+						dataResult.message = "Items successfully checkout";
+					}
+				});
 			}
 		});
-	} else {
-		// Throws an error if the user is not an admin
-		return Promise.reject("You are not allowed to access this feature!");
-	}
+	};
+
+	await User.findById(data.userId).then((userResult, err) => {
+		if (err) {
+			console.error(err);
+		} else {
+			for (let ctr = 0; ctr < userResult.orders.length; ctr++) {
+				if (data.order.orderId == userResult.orders[ctr]._id) {
+					let index = userResult.orders.indexOf(userResult.orders[ctr]);
+					let spliceResult = userResult.orders.splice(index, 1);
+
+					// Save the changes on the orders array
+					return userResult.save().then((userSaveResult, err) => {
+						if (err) {
+							// Throws and error if the changes cannot be saved
+							return Promise.reject("Failed to checkout");
+						} else {
+							dataResult.result = spliceResult;
+						};
+					});
+				}
+			}
+		}
+	});
+
+	return dataResult;
 };
-// End of getAllOrders controller
 
 
 // Controller to get all users

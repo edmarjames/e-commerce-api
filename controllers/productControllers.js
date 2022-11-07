@@ -6,7 +6,7 @@ const auth = require("../auth");
 
 
 module.exports.getAllProducts = () => {
-	return Product.find({}).then((result, err) => {
+return Product.find({}, {order: 0}).then((result, err) => {
 		if (err) {
 			return Promise.reject(err);
 		} else {
@@ -20,7 +20,7 @@ module.exports.getAllProducts = () => {
 };
 
 module.exports.getActiveProducts = () => {
-	return Product.find({isActive: true}).then((result, err) => {
+	return Product.find({isActive: true}, {order: 0}).then((result, err) => {
 		if (err) {
 			return Promise.reject(err);
 		} else {
@@ -34,7 +34,7 @@ module.exports.getActiveProducts = () => {
 };
 
 module.exports.getSingleProduct = (reqParams) => {
-	return Product.findById({_id: reqParams.productId}).then((result, err) => {
+	return Product.findById({_id: reqParams.productId}, {order: 0}).then((result, err) => {
 		if (err) {
 			return Promise.reject("Product does not exists");
 		} else {
@@ -175,4 +175,33 @@ module.exports.activateProduct = (data) => {
 	} else {
 		return Promise.reject("You are not allowed to access this feature!");
 	}
-}
+};
+
+module.exports.getAllOrders = (data) => {
+
+	if (data.isAdmin) {
+		return Product.find({}, {name: 1, price: 1, order: 1}).then((result, err) => {
+			if (err) {
+				console.error(err);
+			} else {
+				const data = {
+					message: "All orders",
+					order: []
+				};
+
+				for (let ctr = 0; ctr < result.length; ctr++) {	
+					if (result[ctr].order.length == 0) {
+						continue;
+					} else {
+						data.order.push(result[ctr]);
+					}
+				};
+
+				return data;
+			}
+		});
+	} else {
+		return Promise.reject("You are not allowed to access this feature!");
+	}
+
+};
