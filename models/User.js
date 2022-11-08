@@ -35,10 +35,6 @@ const userSchema = new mongoose.Schema({
 						type: String,
 						required: [true, "Product ID is required"]
 					},
-					/*productName: {
-						type: String,
-						required: [true, "Product name is required"]	
-					},*/
 					quantity: {
 						type: Number,
 						required: [true, "quantity is required"]
