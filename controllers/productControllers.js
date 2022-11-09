@@ -106,7 +106,8 @@ module.exports.updateProduct = (data) => {
 				// Throws an error if the product does not exists
 				return Promise.reject("Product does not exists!");
 			} else {
-				// Checks if there is a field not provided from the request body, if there is, the value of the field will be the same as before. If not the value will be updated based from the request body
+				/*Checks if there is a field not provided from the request body, if there is, the value of the field will be the same as before.
+				If not the value will be updated based from the request body*/
 				(data.product.name == null) ? result.name = result.name : result.name = data.product.name;
 				(data.product.description == null) ? result.description = result.description : result.description = data.product.description;
 				(data.product.price == null) ? result.price = result.price : result.price = data.product.price;
@@ -204,38 +205,3 @@ module.exports.activateProduct = (data) => {
 	}
 };
 // End of activateProduct controller
-
-
-// Controller for getting all the orders, needs admin token
-module.exports.getAllOrders = (data) => {
-	// Checks if the authenticated user is an admin
-	if (data.isAdmin) {
-		// Query through all the products and return the necessary fields only
-		return Product.find({}, {name: 1, price: 1, order: 1, description: 1}).then((result, err) => {
-			if (err) {
-				console.error(err);
-			} else {
-				// This object will be the final result
-				const data = {
-					message: "All orders",
-					order: []
-				};
-				// Loops through the order array and check if the product has no order yet, If yes it will not be return.
-				for (let ctr = 0; ctr < result.length; ctr++) {	
-					if (result[ctr].order.length == 0) {
-						continue;
-					} else {
-						// Push all the product details with order to the data.order array
-						data.order.push(result[ctr]);
-					}
-				};
-				// return the data object
-				return data;
-			}
-		});
-	} else {
-		// Throws an error if the user is not an admin
-		return Promise.reject("You are not allowed to access this feature!");
-	}
-};
-// End of getAllOrders controller

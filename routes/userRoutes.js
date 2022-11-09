@@ -23,7 +23,7 @@ router.post("/login", (req, res) => {
 });
 
 // Route to get the profile/details of the authenticated user
-router.get("/profile", auth.verify, (req, res) => {
+router.get("/getUserDetails", auth.verify, (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 
 	userController.getProfile({userId: userData.id})
@@ -32,11 +32,12 @@ router.get("/profile", auth.verify, (req, res) => {
 });
 
 // Route to add product/s to the cart of the authenticated user
-router.post("/add-to-cart", (req, res) => {
+router.post("/checkout", (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
 		order: req.body,
-		userId: userData.id
+		userId: userData.id,
+		isAdmin: userData.isAdmin
 	};
 
 	userController.addToCart(data)
@@ -47,17 +48,25 @@ router.post("/add-to-cart", (req, res) => {
 // Route to view the cart of the authenticated user
 router.get("/cart", auth.verify, (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
+	const data = {
+		userId: userData.id,
+		isAdmin: userData.isAdmin
+	}
 
-	userController.viewCart({userId: userData.id})
+	userController.viewCart(data)
 	.then(controllerResult => res.send(controllerResult))
 	.catch(controllerError => res.send(controllerError));
 });
 
 // Route to get all the orders that has been checkout already
-router.get("/cart/paid", (req, res) => {
+router.get("/myOrders", (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
+	const data = {
+		userId: userData.id,
+		isAdmin: userData.isAdmin
+	}
 
-	userController.getMyOrders({userId: userData.id})
+	userController.getMyOrders(data)
 	.then(controllerResult => res.send(controllerResult))
 	.catch(controllerError => res.send(controllerError));
 });
@@ -67,7 +76,8 @@ router.put("/cart/remove/:orderId", auth.verify, (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
 		order: req.params,
-		userId: userData.id
+		userId: userData.id,
+		isAdmin: userData.isAdmin
 	};
 
 	userController.removeOrderFromCart(data)
@@ -80,7 +90,8 @@ router.put("/cart/remove-product/:productOrderId", (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
 		order: req.params,
-		userId: userData.id
+		userId: userData.id,
+		isAdmin: userData.isAdmin
 	};
 
 	userController.removeProductFromCart(data)
@@ -93,7 +104,8 @@ router.patch("/cart/update-quantity", auth.verify, (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
 		order: req.body,
-		userId: userData.id
+		userId: userData.id,
+		isAdmin: userData.isAdmin
 	};
 
 	userController.updateOrderQuantity(data)
@@ -102,14 +114,25 @@ router.patch("/cart/update-quantity", auth.verify, (req, res) => {
 });
 
 // Route to checkout an order from the cart of the authenticated user
-router.post("/cart/checkout", auth.verify, (req, res) => {
+router.post("/checkoutOrder", auth.verify, (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
 		order: req.body,
-		userId: userData.id
+		userId: userData.id,
+		isAdmin: userData.isAdmin
 	};
 
 	userController.checkOutOrder(data)
+	.then(controllerResult => res.send(controllerResult))
+	.catch(controllerError => res.send(controllerError));
+});
+
+// Route for getting all orders categorized per product, needs admin token
+router.get("/orders", auth.verify, (req, res) => {
+
+	const userData = auth.decode(req.headers.authorization);
+
+	userController.getAllOrders({isAdmin: userData.isAdmin})
 	.then(controllerResult => res.send(controllerResult))
 	.catch(controllerError => res.send(controllerError));
 });
@@ -124,7 +147,7 @@ router.get("/all-users", auth.verify, (req, res) => {
 });
 
 // Route to set a user to be an admin, needs admin token
-router.put("/updateAdmin/:userId", auth.verify, (req, res) => {
+router.put("/:userId/setAsAdmin", auth.verify, (req, res) => {
 	const data = {
 		user: req.params,
 		isAdmin: auth.decode(req.headers.authorization).isAdmin

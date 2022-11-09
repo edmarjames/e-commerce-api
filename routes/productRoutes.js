@@ -22,16 +22,6 @@ router.get("/active", (req, res) => {
 	.catch(controllerError => res.send(controllerError));
 });
 
-// Route for getting all orders categorized per product, needs admin token
-router.get("/all-orders", auth.verify, (req, res) => {
-
-	const userData = auth.decode(req.headers.authorization);
-
-	productController.getAllOrders({isAdmin: userData.isAdmin})
-	.then(controllerResult => res.send(controllerResult))
-	.catch(controllerError => res.send(controllerError));
-});
-
 // Route for getting a specific product
 router.get("/:productId", (req, res) => {
 	productController.getSingleProduct(req.params)
