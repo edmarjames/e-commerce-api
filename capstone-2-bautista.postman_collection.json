@@ -118,7 +118,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:4000/products/636b8d36f861dc419544f467",
+							"raw": "http://localhost:4000/products/636c9ae12f15291edd9ef9e0",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -126,7 +126,7 @@
 							"port": "4000",
 							"path": [
 								"products",
-								"636b8d36f861dc419544f467"
+								"636c9ae12f15291edd9ef9e0"
 							]
 						}
 					},
@@ -168,14 +168,14 @@
 					"response": []
 				},
 				{
-					"name": "Add to cart",
+					"name": "Create order",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNmI3ZGEwYzVhOTZkOTI3ZGNkNzAxYiIsImVtYWlsIjoidXNlckBtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2Njc5ODg5MjN9.BQ4uAODnwP9QWBlF8C4AjOZlGBw2fL2DVvZYBnAdpb4",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNmJjMDgwY2YwMDIzYzcxMThkYzBjYSIsImVtYWlsIjoidXNlckBtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2NjgwMDYwMzV9.CYScKmNMxslYY3xb8XVG9daM4Ny1JPiyXyqbMqAYIWQ",
 									"type": "string"
 								}
 							]
@@ -184,7 +184,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\r\n    {\r\n        \"productId\": \"636b7d61c5a96d927dcd700f\",\r\n        \"quantity\": 1\r\n    },\r\n    {\r\n        \"productId\": \"636b7d61c5a96d927dcd7010\",\r\n        \"quantity\": 1\r\n    },\r\n    {\r\n        \"productId\": \"636b7d61c5a96d927dcd7011\",\r\n        \"quantity\": 1\r\n    }\r\n]",
+							"raw": "[\r\n    {\r\n        \"productId\": \"636bc10bcf0023c7118dc0db\",\r\n        \"quantity\": 1\r\n    },\r\n    {\r\n        \"productId\": \"636bc10bcf0023c7118dc0dd\",\r\n        \"quantity\": 1\r\n    }\r\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -201,6 +201,45 @@
 							"path": [
 								"users",
 								"checkout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add to cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNmJjMDgwY2YwMDIzYzcxMThkYzBjYSIsImVtYWlsIjoidXNlckBtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2NjgwMDYwMzV9.CYScKmNMxslYY3xb8XVG9daM4Ny1JPiyXyqbMqAYIWQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"productId\": \"636bc10bcf0023c7118dc0d7\",\r\n        \"quantity\": 1\r\n    },\r\n    {\r\n        \"productId\": \"636bc10bcf0023c7118dc0d9\",\r\n        \"quantity\": 1\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/users/addToCart",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"users",
+								"addToCart"
 							]
 						}
 					},
@@ -276,7 +315,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNmI3ZGEwYzVhOTZkOTI3ZGNkNzAxYiIsImVtYWlsIjoidXNlckBtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2Njc5ODg5MjN9.BQ4uAODnwP9QWBlF8C4AjOZlGBw2fL2DVvZYBnAdpb4",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNmM5YWY0MmYxNTI5MWVkZDllZjllNiIsImVtYWlsIjoidXNlckBtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2NjgwNjE5NTF9.GzQmIHRBx6_VWBQtu5JvsQ-g-XxKOhgBc9b-9Xx-yHU",
 									"type": "string"
 								}
 							]
@@ -284,7 +323,7 @@
 						"method": "PUT",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:4000/users/cart/remove-product/636b91669d02c886a0cabc2d",
+							"raw": "http://localhost:4000/users/cart/removeProduct/636c9e582f15291edd9efaff",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -293,8 +332,8 @@
 							"path": [
 								"users",
 								"cart",
-								"remove-product",
-								"636b91669d02c886a0cabc2d"
+								"removeProduct",
+								"636c9e582f15291edd9efaff"
 							]
 						}
 					},
@@ -308,7 +347,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNmI3ZGEwYzVhOTZkOTI3ZGNkNzAxYiIsImVtYWlsIjoidXNlckBtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2Njc5ODg5MjN9.BQ4uAODnwP9QWBlF8C4AjOZlGBw2fL2DVvZYBnAdpb4",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNmNhZWJlYWNkNTIyNzNiYTJlZjljOCIsImVtYWlsIjoidXNlckBtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2NjgwNjcwMzJ9.yoMLHOhH--wcaLOlN8qr6wgWnLGYp-6I3DmntyLASGY",
 									"type": "string"
 								}
 							]
@@ -317,7 +356,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"orderId\": \"636b921fbd3e05bc45e55c95\",\r\n    \"quantity\": 2\r\n}",
+							"raw": "{\r\n    \"orderId\": \"636cafc3acd52273ba2efa41\",\r\n    \"quantity\": 2\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -325,7 +364,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4000/users/cart/update-quantity",
+							"raw": "http://localhost:4000/users/cart/updateQuantity",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -334,7 +373,7 @@
 							"path": [
 								"users",
 								"cart",
-								"update-quantity"
+								"updateQuantity"
 							]
 						}
 					},
@@ -348,7 +387,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNmI3ZGEwYzVhOTZkOTI3ZGNkNzAxYiIsImVtYWlsIjoidXNlckBtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2Njc5ODg5MjN9.BQ4uAODnwP9QWBlF8C4AjOZlGBw2fL2DVvZYBnAdpb4",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNmJjMDgwY2YwMDIzYzcxMThkYzBjYSIsImVtYWlsIjoidXNlckBtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2NjgwMDYwMzV9.CYScKmNMxslYY3xb8XVG9daM4Ny1JPiyXyqbMqAYIWQ",
 									"type": "string"
 								}
 							]
@@ -357,7 +396,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"orderId\": \"636b921fbd3e05bc45e55c94\"\r\n}\r\n\r\n\r\n",
+							"raw": "{\r\n    \"orderId\": \"636bc134cf0023c7118dc0ec\"\r\n}\r\n\r\n\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -365,7 +404,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4000/users/checkoutOrder",
+							"raw": "http://localhost:4000/users/checkoutFromCart",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -373,7 +412,7 @@
 							"port": "4000",
 							"path": [
 								"users",
-								"checkoutOrder"
+								"checkoutFromCart"
 							]
 						}
 					},
@@ -592,7 +631,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNjRlYzE3NTE3OWM1YzE5YjZlZTY0NCIsImVtYWlsIjoiYWRtaW5AbWFpbC5jb20iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE2Njc5NzIwMTh9.xNKEhR4U7bYksYHdUVnwYb--_QUe98DVWKoHTQyqhNo",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNmI3ZGFiYzVhOTZkOTI3ZGNkNzAxZiIsImVtYWlsIjoidXNlcjJAbWFpbC5jb20iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE2NjgwNjMzMDR9.dSz8M7E1OxJlE70uD4HqEbjV_6RAuK1MUfMuVZYyI6o",
 									"type": "string"
 								}
 							]
@@ -600,7 +639,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:4000/users/all-users",
+							"raw": "http://localhost:4000/users/allUsers",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -608,7 +647,7 @@
 							"port": "4000",
 							"path": [
 								"users",
-								"all-users"
+								"allUsers"
 							]
 						}
 					},

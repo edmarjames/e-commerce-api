@@ -29,7 +29,11 @@ module.exports.registerUser = (reqBody) => {
 				if (err) {
 					console.error(err);
 				} else {
-					return Promise.resolve("Successfully Registered!");
+					const data = {
+						message: "Successfully Registered!",
+						result: result
+					}
+					return data;
 				};
 			});
 		};
@@ -86,6 +90,111 @@ module.exports.getProfile = (data) => {
 };
 // End of getProfile controller
 
+// Controller for creating an order and checks out automatically
+module.exports.createOrder = async (data) => {
+	if (data.isAdmin) {
+		return Promise.reject("You are an admin!");
+
+	// If user is non-admin, proceed with the operations
+	} else {
+		// Declare the variables needed for later use
+		let price = [];
+		let totalAmount = [];
+		const newProduct = {
+			products: data.order
+		};
+		
+		// Loops through the request body to get the productId
+		for (let orders of data.order) {
+			await Product.findById(orders.productId).then((result, err) => {
+				if (err) {
+					console.error(err);
+				} else {
+					// Push the retrieved price of the products to the price array
+					price.push(result.price);
+				}
+			});
+		};
+
+		// Computes the subtotal based from the quantity from the request body and the prices on the price array
+		for (let ctr1 = 0, ctr = 0; ctr1 < price.length, ctr < data.order.length; ctr1++, ctr++) {
+			totalAmount.push(newProduct.products[ctr].quantity * price[ctr1]);
+		}
+		// Add the computed totalAmount to the newProduct object
+		newProduct.totalAmount = totalAmount.reduce((x, y) => x + y);
+
+		// This will contain the final result
+		const dataResult = {
+			message: "Order created"
+		};
+		// Declare variable for later use
+		let reverseOrder;
+
+		// Find the authenticated user using it's userId
+		await User.findById(data.userId).then((userResult, err) => {
+			if (err) {
+				console.error(err);
+			} else {
+				// Push the newProduct object to the orders array of the user
+				userResult.orders.push(newProduct);
+
+				// Save the changes on the user orders array
+				return userResult.save().then((saveResult, err) => {
+					if (err) {
+						console.error(err);
+					} else {
+						// Add the created order on the dataResult object
+						dataResult.result = userResult.orders.slice(-1);
+
+						// Pass the orders array of the user in reverse order
+						reverseOrder = userResult.orders.reverse();
+					}
+				});
+			};
+		});
+
+		let orderId;
+		// Gets the orderId of the recently added order
+		for (let ctr = 0; ctr < reverseOrder.length; ctr++) {
+			// Pass the orderId to the orderId variable
+			orderId = reverseOrder[ctr]._id;
+			break;
+		}
+
+		// Loops through the request body
+		for (order of data.order) {
+			// Finds the product on the Product model using the productId's from the request body array
+			await Product.findById(order.productId).then((productResult, err) => {
+				if (err) {
+					console.log(err);
+				} else {
+					// Create a newProductOrder object to be push on the order array of the identified product
+					let newProductOrder = {
+						orderId: orderId,
+						userId: data.userId,
+						quantity: order.quantity
+					}
+
+					// Push the newProductOrder to the order array
+					productResult.order.push(newProductOrder);
+
+					// Save the changes on the order array of the product
+					productResult.save().then((productSaveResult, err) => {
+						if (err) {
+							console.error(err);
+						} else {
+							// dataResult.order = orderDetails;		
+						}
+					});
+				};
+			});
+		};
+
+		// Return the dataResult object
+		return dataResult;
+	};
+};
+// End
 
 // Controller for adding a product to the cart
 module.exports.addToCart = async (data) => {
@@ -415,13 +524,37 @@ module.exports.getMyOrders = async (data) => {
 
 
 // Controller to remove an order from the cart
-module.exports.removeOrderFromCart = (data) => {
+module.exports.removeOrderFromCart = async (data) => {
 	// Checks if the authenticated user is an admin
 	if (data.isAdmin) {
 		return Promise.reject("You are an admin!");
 
 	// If user is non-admin, proceed with the operations
 	} else {
+		// This will store the orderId's from the Product model
+		const orderId = [];
+
+		// Collect all the orderId of every order from Product model
+		await Product.find({"order.userId": data.userId}).then((result, err) => {
+			if (err) {
+				console.log(err);
+			} else {
+				for (let ctr = 0; ctr < result.length; ctr++) {
+					for (let ctr1 = 0; ctr1 < result[ctr].order.length; ctr1++) {
+						// Push all the orderId to the orderId array to be use by other queries
+						orderId.push(result[ctr].order[ctr1].orderId);		
+					}
+				}
+			}
+		});
+
+		// This will only filter unique orderIds
+		const unique = (value, index, self) => {
+	  		return self.indexOf(value) === index
+		}
+		// Apply the unique function to the orderId array
+		let uniqueElements = orderId.filter(unique);
+
 		// Find the authenticated user using it's ID from the JSON web token
 		return User.findById(data.userId).then((result, err) => {
 			if (err) {
@@ -431,30 +564,35 @@ module.exports.removeOrderFromCart = (data) => {
 				/*If the user is found, this will loop through the order array of the user 
 				to get the exact order matching the orderId provided from the request body*/
 				for (let ctr = 0; ctr < result.orders.length; ctr++) {
-					if(data.order.orderId == result.orders[ctr]._id) {
+					// Checks whether the order was already been checkout, if yes, API will not allow it
+					if (uniqueElements.includes(data.order.orderId)) {
+						return Promise.reject("Cannot remove, this was already checked out.");
 
-						// Get the index of the found order on the array and remove it from the array using splice
-						let index = result.orders.indexOf(result.orders[ctr]);
-						let spliceResult = result.orders.splice(index, 1);
-
-						// Save changes on the order array
-						return result.save().then((saveResult, err) => {
-							if (err) {
-								// Throws and error if the changes cannot be saved
-								return Promise.reject("Failed to remove item");
-							} else {
-								// Returns the message and the removed order
-								const data = {
-									message: "Products successfully removed from cart",
-									result: spliceResult
-								};
-								return data;
-							};
-						});
-						
 					} else {
-						// Continue on the loop if the orderId from the request body and order array did not match
-						continue;
+						// If not, proceed with the operations
+						if(data.order.orderId == result.orders[ctr]._id) {
+							// Get the index of the found order on the array and remove it from the array using splice
+							let index = result.orders.indexOf(result.orders[ctr]);
+							let spliceResult = result.orders.splice(index, 1);
+
+							// Save changes on the order array
+							return result.save().then((saveResult, err) => {
+								if (err) {
+									// Throws and error if the changes cannot be saved
+									return Promise.reject("Failed to remove item");
+								} else {
+									// Returns the message and the removed order
+									const data = {
+										message: "Products successfully removed from cart",
+										result: spliceResult
+									};
+									return data;
+								};
+							});
+						} else {
+							// Continue on the loop if the orderId from the request body and order array did not match
+							continue;
+						};
 					};
 				};
 			};
@@ -465,15 +603,44 @@ module.exports.removeOrderFromCart = (data) => {
 
 
 // Controller for removing a product from cart
-module.exports.removeProductFromCart = (data) => {
+module.exports.removeProductFromCart = async (data) => {
 	// Checks if the authenticated user is an admin
 	if (data.isAdmin) {
 		return Promise.reject("You are an admin!");
 
 	// If user is non-admin, proceed with the operations
 	} else {
+		// This will store the orderId's from the Product model
+		const orderId = [];
+
+		// Collect all the orderId of every order from Product model
+		await Product.find({"order.userId": data.userId}).then((result, err) => {
+			if (err) {
+				console.log(err);
+			} else {
+				for (let ctr = 0; ctr < result.length; ctr++) {
+					for (let ctr1 = 0; ctr1 < result[ctr].order.length; ctr1++) {
+						// Push all the orderId to the orderId array to be use by other queries
+						orderId.push(result[ctr].order[ctr1].orderId);		
+					};
+				};
+			};
+		});
+
+		// This will only filter unique orderIds
+		const unique = (value, index, self) => {
+	  		return self.indexOf(value) === index
+		}
+		// Apply the unique function to the orderId array
+		let uniqueElements = orderId.filter(unique);
+
+		// This object will contain the final result
+		const dataResult = {
+			message: "Product successfully removed from cart"
+		};
+
 		// Find the authenticated user using it's userId
-		return User.findById(data.userId).then((result, err) => {
+		await User.findById(data.userId).then((result, err) => {
 			if (err) {
 				// Throws an error if the user cannot be find on the database
 				return Promise.reject(err);
@@ -483,26 +650,25 @@ module.exports.removeProductFromCart = (data) => {
 				for (let ctr = 0; ctr < result.orders.length; ctr++) {
 					for (let ctr1 = 0; ctr1 < result.orders[ctr].products.length; ctr1++) {
 						if(data.order.productOrderId == result.orders[ctr].products[ctr1]._id) {
+							// Checks if the orderId of the order where the product belongs was already checkout.
+							if (uniqueElements.includes(result.orders[ctr]._id.toString())) {
+								return Promise.reject("Cannot remove, this product was already checked out.");
+							} else {
+								// Get the index of the found product on the array and remove it from the array using splice
+								let index = result.orders[ctr].products.indexOf(result.orders[ctr].products[ctr1]);
+								let spliceResult = result.orders[ctr].products.splice(index, 1);
 
-							// Get the index of the found product on the array and remove it from the array using splice
-							let index = result.orders[ctr].products.indexOf(result.orders[ctr].products[ctr1]);
-							let spliceResult = result.orders[ctr].products.splice(index, 1);
-
-							// Save changes on the products array of orders array
-							return result.save().then((saveResult, err) => {
-								if (err) {
-									// Throws and error if the changes cannot be saved
-									return Promise.reject("Failed to remove item");
-								} else {
-									// Returns the message and the removed product
-									const data = {
-										message: "Product successfully removed from cart",
-										result: spliceResult
+								// Save changes on the products array of orders array
+								return result.save().then((saveResult, err) => {
+									if (err) {
+										// Throws and error if the changes cannot be saved
+										return Promise.reject("Failed to remove item");
+									} else {
+										// Add the removed product to the dataResult object
+										dataResult.result = spliceResult;
 									};
-									return data;
-								};
-							});
-						
+								});
+							};
 						} else {
 							// Continue on the loop if the productOrderId from the request body and products array did not match
 							continue;
@@ -511,21 +677,52 @@ module.exports.removeProductFromCart = (data) => {
 				};
 			};
 		});
+		// Return the dataResult object
+		return Promise.resolve(dataResult);
 	};
 };
 // End of removeProductFromCart controller
 
 
 // Controller to update the quantity of the product
-module.exports.updateOrderQuantity = (data) => {
+module.exports.updateOrderQuantity = async (data) => {
 	// Checks if the authenticated user is an admin
 	if (data.isAdmin) {
 		return Promise.reject("You are an admin!");
 
 	// If user is non-admin, proceed with the operations
 	} else {
+		// This will store the orderId's from the Product model
+		const orderId = [];
+
+		// Collect all the orderId of every order from Product model
+		await Product.find({"order.userId": data.userId}).then((result, err) => {
+			if (err) {
+				console.log(err);
+			} else {
+				for (let ctr = 0; ctr < result.length; ctr++) {
+					for (let ctr1 = 0; ctr1 < result[ctr].order.length; ctr1++) {
+						// Push all the orderId to the orderId array to be use by other queries
+						orderId.push(result[ctr].order[ctr1].orderId);		
+					};
+				};
+			};
+		});
+
+		// This will only filter unique orderIds
+		const unique = (value, index, self) => {
+	  		return self.indexOf(value) === index
+		}
+		// Apply the unique function to the orderId array
+		let uniqueElements = orderId.filter(unique);
+
+		// This will contain the final result
+		const dataResult = {
+			message: "Quantity successfully updated"
+		};
+
 		// Find the authenticated user using it's userId
-		return User.findById(data.userId).then((result, err) => {
+		await User.findById(data.userId).then((result, err) => {
 			if (err) {
 				// Throws an error if the user cannot be found on the database
 				return Promise.reject(err);
@@ -536,24 +733,24 @@ module.exports.updateOrderQuantity = (data) => {
 					for (let ctr = 0; ctr < result.orders[counter].products.length; ctr++) {
 						if (data.order.orderId == result.orders[counter].products[ctr]._id) {
 
-							// Updates the quantity of the product based on the quantity provided from the request body
-							result.orders[counter].products[ctr].quantity = data.order.quantity;
+							// Checks if the orderId of the order where the product belongs was already checkout.
+							if (uniqueElements.includes(result.orders[counter]._id.toString())) {
+								return Promise.reject("Cannot update quantity, this product was already checked out.");
+							} else {
+								// Updates the quantity of the product based on the quantity provided from the request body
+								result.orders[counter].products[ctr].quantity = data.order.quantity;
 
-							// Save the changes on the products array of the orders array
-							return result.save().then((saveResult, err) => {
-								if (err) {
-									// Throws and error if the changes cannot be saved
-									return Promise.reject("Failed to update quantity");
-								} else {
-									// Returns the message and the updated product
-									const data = {
-										message: "Quantity successfully updated",
-										result: result.orders[counter].products[ctr]
+								// Save the changes on the products array of the orders array
+								return result.save().then((saveResult, err) => {
+									if (err) {
+										// Throws and error if the changes cannot be saved
+										return Promise.reject("Failed to update quantity");
+									} else {
+										// Add the updated product to the dataResult object
+										dataResult.result = result.orders[counter].products[ctr]
 									};
-									return data;
-								};
-							});
-
+								});
+							};
 						} else {
 							// Continue on the loop if the productOrderId from the request body and products array did not match
 							continue;
@@ -562,6 +759,8 @@ module.exports.updateOrderQuantity = (data) => {
 				}; 
 			};
 		});
+		// Return the dataResult object
+		return Promise.resolve(dataResult);
 	};
 };
 // End of updateOrderQuantity controller
@@ -575,6 +774,30 @@ module.exports.checkOutOrder = async (data) => {
 
 	// If user is non-admin, proceed with the operations
 	} else {
+		// This will store the orderId's from the Product model
+		const orderIds = [];
+
+		// Collect all the orderId of every order from Product model
+		await Product.find({"order.userId": data.userId}).then((result, err) => {
+			if (err) {
+				console.log(err);
+			} else {
+				for (let ctr = 0; ctr < result.length; ctr++) {
+					for (let ctr1 = 0; ctr1 < result[ctr].order.length; ctr1++) {
+						// Push all the orderId to the orderId array to be use by other queries
+						orderIds.push(result[ctr].order[ctr1].orderId);		
+					}
+				}
+			}
+		});
+
+		// This will only filter unique orderIds
+		const unique = (value, index, self) => {
+	  		return self.indexOf(value) === index
+		}
+		// Apply the unique function to the orderId array
+		let uniqueElements = orderIds.filter(unique);
+
 		// Declare needed variables for later use
 		let orderId;
 		let purchasedOn;
@@ -588,20 +811,25 @@ module.exports.checkOutOrder = async (data) => {
 			} else {
 				// This will loop through the orders array of the user
 				for (let ctr = 0; ctr < result.orders.length; ctr++) {
-					// Checks if the orderId from the request body and orderId from the users orders array matched
-					if(data.order.orderId == result.orders[ctr]._id) {
-						for (let counter = 0; counter < result.orders[ctr].products.length; counter++) {
-							// Assign the retrieved orderId to the orderId variable to be use by other queries
-							orderId = result.orders[ctr]._id;
-							// Assign the retrieved purchasedOn date to the purchasedOn variable to be use by other queries
-							purchasedOn = result.orders[ctr].purchasedOn;
-
-							// Push the order details to the orderDetails array to be use by other queries
-							orderDetails.push(result.orders[ctr].products[counter]);
-						};
+					// Checks whether the order was already been checkout, if yes, API will not allow it
+					if (uniqueElements.includes(data.order.orderId)) {
+						return Promise.reject("This order was already checked out.");
 					} else {
-						// Continue on the loop if the orderId from the request body and orders array did not match
-						continue;
+						// Checks if the orderId from the request body and orderId from the users orders array matched
+						if(data.order.orderId == result.orders[ctr]._id) {
+							for (let counter = 0; counter < result.orders[ctr].products.length; counter++) {
+								// Assign the retrieved orderId to the orderId variable to be use by other queries
+								orderId = result.orders[ctr]._id;
+								// Assign the retrieved purchasedOn date to the purchasedOn variable to be use by other queries
+								purchasedOn = result.orders[ctr].purchasedOn;
+
+								// Push the order details to the orderDetails array to be use by other queries
+								orderDetails.push(result.orders[ctr].products[counter]);
+							};
+						} else {
+							// Continue on the loop if the orderId from the request body and orders array did not match
+							continue;
+						};
 					};
 				};
 			};
@@ -716,7 +944,7 @@ module.exports.getAllOrders = (data) => {
 	// Checks if the authenticated user is an admin
 	if (data.isAdmin) {
 		// Query through all the products and return the necessary fields only
-		return Product.find({}, {name: 1, price: 1, order: 1, description: 1}).then((result, err) => {
+		return Product.find({}, {name: 1, price: 1, order: 1}).then((result, err) => {
 			if (err) {
 				console.error(err);
 			} else {

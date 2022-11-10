@@ -31,8 +31,22 @@ router.get("/getUserDetails", auth.verify, (req, res) => {
 	.catch(controllerError => res.send(controllerError));
 });
 
-// Route to add product/s to the cart of the authenticated user
+// Route for creating an order and checks out automatically
 router.post("/checkout", (req, res) => {
+	const userData = auth.decode(req.headers.authorization);
+	const data = {
+		order: req.body,
+		userId: userData.id,
+		isAdmin: userData.isAdmin
+	};
+
+	userController.createOrder(data)
+	.then(controllerResult => res.send(controllerResult))
+	.catch(controllerError => res.send(controllerError));
+});
+
+// Route to add product/s to the cart of the authenticated user
+router.post("/addToCart", (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
 		order: req.body,
@@ -86,7 +100,7 @@ router.put("/cart/remove/:orderId", auth.verify, (req, res) => {
 });
 
 // Route to remove a single product from the cart of the authenticated user
-router.put("/cart/remove-product/:productOrderId", (req, res) => {
+router.put("/cart/removeProduct/:productOrderId", (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
 		order: req.params,
@@ -100,7 +114,7 @@ router.put("/cart/remove-product/:productOrderId", (req, res) => {
 });
 
 // Route to update the quantity of a product from the cart of the authenticated user
-router.patch("/cart/update-quantity", auth.verify, (req, res) => {
+router.patch("/cart/updateQuantity", auth.verify, (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
 		order: req.body,
@@ -114,7 +128,7 @@ router.patch("/cart/update-quantity", auth.verify, (req, res) => {
 });
 
 // Route to checkout an order from the cart of the authenticated user
-router.post("/checkoutOrder", auth.verify, (req, res) => {
+router.post("/checkoutFromCart", auth.verify, (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 	const data = {
 		order: req.body,
@@ -138,7 +152,7 @@ router.get("/orders", auth.verify, (req, res) => {
 });
 
 // Route to get all users registered to the API, needs admin token
-router.get("/all-users", auth.verify, (req, res) => {
+router.get("/allUsers", auth.verify, (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
 
 	userController.getAllUsers({isAdmin: userData.isAdmin})
