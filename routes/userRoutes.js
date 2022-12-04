@@ -31,6 +31,19 @@ router.get("/getUserDetails", auth.verify, (req, res) => {
 	.catch(controllerError => res.send(controllerError));
 });
 
+router.post("/changePassword", auth.verify, (req, res) => {
+	const userData = auth.decode(req.headers.authorization);
+	const data = {
+		reqBody: req.body,
+		userId: userData.id,
+		isAdmin: userData.isAdmin
+	}
+
+	userController.changePassword(data)
+	.then(controllerResult => res.send(controllerResult))
+	.catch(controllerError => res.send(controllerError));
+})
+
 // Route for creating an order and checks out automatically
 router.post("/checkout", (req, res) => {
 	const userData = auth.decode(req.headers.authorization);
@@ -160,6 +173,16 @@ router.get("/allUsers", auth.verify, (req, res) => {
 	.catch(controllerError => res.send(controllerError));
 });
 
+// Route for getting all orders categorized per product, needs admin token
+router.get("/allOrders", auth.verify, (req, res) => {
+
+	const userData = auth.decode(req.headers.authorization);
+
+	userController.fetchAllOrders({isAdmin: userData.isAdmin})
+	.then(controllerResult => res.send(controllerResult))
+	.catch(controllerError => res.send(controllerError));
+});
+
 // Route to set a user to be an admin, needs admin token
 router.put("/:userId/setAsAdmin", auth.verify, (req, res) => {
 	const data = {
@@ -171,6 +194,17 @@ router.put("/:userId/setAsAdmin", auth.verify, (req, res) => {
 	.then(controllerResult => res.send(controllerResult))
 	.catch(controllerError => res.send(controllerError));
 });
+
+router.put("/:userId/setAsNormalUser", auth.verify, (req, res) => {
+	const data = {
+		user: req.params,
+		isAdmin: auth.decode(req.headers.authorization).isAdmin
+	};
+
+	userController.setAsNormalUser(data)
+	.then(controllerResult => res.send(controllerResult))
+	.catch(controllerError => res.send(controllerError));
+})
 
 // Export the router
 module.exports = router;

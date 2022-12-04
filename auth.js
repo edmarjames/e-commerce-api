@@ -22,13 +22,13 @@ module.exports.verify = (req, res, next) => {
 
 		return jwt.verify(token, secret, (err, data) => {
 			if (err) {
-				return res.send({auth: "failed"});
+				return res.send({auth: "Error 401 - Unauthorized"});
 			} else {
 				next();
 			}
 		});
 	} else {
-		return res.send({auth: "failed"});
+		return res.send({auth: "Error 401 - Unauthorized"});
 	}
 };
 

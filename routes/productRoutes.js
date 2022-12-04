@@ -9,8 +9,12 @@ const productController = require("../controllers/productControllers");
 // Routes
 
 // Route for getting all products
-router.get("/", (req, res) => {
-	productController.getAllProducts()
+router.get("/", auth.verify, (req, res) => {
+	const data = {
+		isAdmin: auth.decode(req.headers.authorization).isAdmin
+	}
+
+	productController.getAllProducts(data)
 	.then(controllerResult => res.send(controllerResult))
 	.catch(controllerError => res.send(controllerError));
 });
