@@ -447,8 +447,18 @@ module.exports.viewCart = async (data) => {
 			});
 		};
 
+		// Checks if the cart is empty
+		if (resultObj.cart.length === 0) {
+			const emptyCart = {
+				message: "Your cart is empty"
+			}
+			return emptyCart;
+
 		// Return the final result
-		return resultObj;
+		} else {
+			return resultObj;
+		};
+
 	};
 };
 // End of viewCart controller
