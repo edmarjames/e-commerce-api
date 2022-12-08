@@ -132,6 +132,7 @@ module.exports.updateProduct = (data) => {
 				(data.product.name == null) ? result.name = result.name : result.name = data.product.name;
 				(data.product.description == null) ? result.description = result.description : result.description = data.product.description;
 				(data.product.price == null) ? result.price = result.price : result.price = data.product.price;
+				(data.product.source == null) ? result.source = result.source : result.source = data.product.source;
 
 				// Save the changes
 				return result.save().then((saveResult, err) => {
