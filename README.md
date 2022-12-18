@@ -1,10 +1,11 @@
 # Table of contents
 + [Introduction](#e-commerce-rest-api)
 + [Routes](#routes)
-+ Upcoming new features
-+ Roadmap
-+ Project Status
-+ Languages and tools
++ [Upcoming new features](#upcoming-new-features)
++ [Installation](#installation)
++ [Roadmap](#roadmap)
++ [Project status](#project-status)
++ [Languages and tools](#language-and-tools)
 
 ## <a name="#e-commerce-rest-api"></a>E-commerce REST API
 
@@ -125,6 +126,7 @@ This project serves as the backend for my full stack e-commerce site during my c
 	    **`https://capstone-2-bautista.onrender.com/users/cart/remove/:orderId`**
 
 	- As reference, this is the orderId on the user's cart.
+
 	![orderId](/uploads/ddddb1e0a38c8ca78293361046ed0c77/orderId.png)
 
 	- The API will provide a message as a response, once operation is successful.
@@ -139,6 +141,7 @@ This project serves as the backend for my full stack e-commerce site during my c
         **`https://capstone-2-bautista.onrender.com/users/cart/removeProduct/:productOrderId`**
 
     - As reference, this is the productOrderId on the user's cart.
+
     ![productOrderId](/uploads/d51fa1518f1146523f10870d22f49afb/productOrderId.png)
 
     - The API will provide a message as a response, once operation is successful.
@@ -201,7 +204,7 @@ This project serves as the backend for my full stack e-commerce site during my c
 
     - The source here, refers to the image url.
 
-    - If the admin wants to add multiple products at the same time. You may wrap your request body with square brackets. Please refer to the snippet below.
+    - If the admin wants to add multiple products at the same time. He/she wrap your request body with square brackets. Please refer to the snippet below.
 
         ```
 	    [
@@ -302,4 +305,53 @@ This project serves as the backend for my full stack e-commerce site during my c
     - **Validations**
     	- The API will provide an error message as a response, if the provided userId does not exist in the database.
         - This route is only permitted to admin users. The API will provide an error message if a non-admin user tries to access this route.
+
+## <a name="#upcoming-new-features"></a>Upcoming New Features
+
+Since my project does not have features yet that are present on popular E-commerce sites nowadays. I am continously developing new features that will transform my app into a real and publishable one.
+
+Here is an overview of the upcoming features
+
++ Add shipping address on checkout
++ Payment options
++ Order status
++ Order tracking
++ Order cancellation
++ Product review
+
+## Installation
+
+If you want to checkout the code and install it on your local machine you may clone my repo by simply running this command.
+
+### `git clone git@gitlab.com:batch-211-bautista/capstone-2-bautista.git`
+
+Then install the packages by simply running.
+
+### `npm install`
+
+Then simply run this command to start it on your localhost.
+
+### `nodemon index.js`
+
+Please feel free to use your favorite API Testing tool but I recommend using Postman.
+
+## Roadmap
+
+For the future releases, I'm planning to follow the list of my upcoming new features listed above and I will also update this README file once I got new ideas along the way.
+
+## <a name="#project-status"></a>Project Status
+
+As of now, I'm taking a break on development since I am also going to be busy on Job hunting. But please feel free to check the code and let me know if you find any bugs or potential new features.
+
+## <a name="#language-and-tools"></a>Languages and tools used
+
+<p align="center">
+    ![logo-mongodb-with-name](/uploads/473d6de9b4ddb41f2672e5c38c2626f1/logo-mongodb-with-name.png)
+    ![logo-expressjs-with-name](/uploads/dfcf1922987758c737a560a5f6f3bad8/logo-expressjs-with-name.png)
+    ![logo-nodejs-with-name](/uploads/14da34fb3cbab4055370f5f99db60ab2/logo-nodejs-with-name.png)
+    ![logo-git-with-name](/uploads/7b9d20b158bbcb8ee9eeb85351f96a3d/logo-git-with-name.png)
+    ![logo-postman-with-name](/uploads/3594a6094f0747b7c9d26b03627ecf42/logo-postman-with-name.png)
+    ![logo-sublime-text-3-with-name](/uploads/de00ce74622a8826b978d075eb513dcf/logo-sublime-text-3-with-name.png)
+</p>
+
 
