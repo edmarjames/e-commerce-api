@@ -346,12 +346,12 @@ As of now, I'm taking a break on development since I am also going to be busy on
 ## <a name="#language-and-tools"></a>Languages and tools used
 
 <p align="center">
-    ![logo-mongodb-with-name](https://i.ibb.co/Y3gRFfB/logo-mongodb-with-name.png)
-    ![logo-expressjs-with-name](https://i.ibb.co/vqk8GMD/logo-expressjs-with-name.png)
-    ![logo-nodejs-with-name](https://i.ibb.co/D5TD86w/logo-nodejs-with-name.png)
-    ![logo-git-with-name](https://i.ibb.co/tP1TFhF/logo-git-with-name.png)
-    ![logo-postman-with-name](https://i.ibb.co/10jtWC2/logo-postman-with-name.png)
-    ![logo-sublime-text-3-with-name](https://i.ibb.co/fMTbdyZ/logo-sublime-text-3-with-name.png)
+    <img src="https://i.ibb.co/Y3gRFfB/logo-mongodb-with-name.png" alt="mongodb" width="150" height="150"/>
+    <img src="https://i.ibb.co/vqk8GMD/logo-expressjs-with-name.png" alt="express" width="150" height="150"/>
+    <img src="https://i.ibb.co/D5TD86w/logo-nodejs-with-name.png" alt="node" width="150" height="176"/>
+    <img src="https://i.ibb.co/tP1TFhF/logo-git-with-name.png" alt="git" width="150" height="150"/>
+    <img src="https://i.ibb.co/10jtWC2/logo-postman-with-name.png" alt="postman" width="150" height="150"/>
+    <img src="https://i.ibb.co/fMTbdyZ/logo-sublime-text-3-with-name.png" alt="sublime" width="150" height="150"/>
 </p>
 
 
