@@ -346,12 +346,12 @@ As of now, I'm taking a break on development since I am also going to be busy on
 ## <a name="#language-and-tools"></a>Languages and tools used
 
 <p align="center">
-    ![logo-mongodb-with-name](https://user-images.githubusercontent.com/112933982/210132224-3b2197b7-2ce3-4fe9-a779-38765baf1d61.png)
-    ![logo-expressjs-with-name](https://user-images.githubusercontent.com/112933982/210132232-4db9beee-e9b7-4161-b94e-c75733d46b1d.png)
-    ![logo-nodejs-with-name](https://user-images.githubusercontent.com/112933982/210132238-996b8190-e177-4a69-9e67-ebbb66f958ef.png)
-    ![logo-git-with-name](https://user-images.githubusercontent.com/112933982/210132244-930ca7b9-345d-4de8-832e-e90798fa55d6.png)
-    ![logo-postman-with-name](https://user-images.githubusercontent.com/112933982/210132253-e20f8d06-6106-4f5f-8370-97df8e136a62.png)
-    ![logo-sublime-text-3-with-name](https://user-images.githubusercontent.com/112933982/210132257-f323b5fa-ae8b-408c-be69-51170250efcd.png)
+    ![logo-mongodb-with-name](https://i.ibb.co/Y3gRFfB/logo-mongodb-with-name.png)
+    ![logo-expressjs-with-name](https://i.ibb.co/vqk8GMD/logo-expressjs-with-name.png)
+    ![logo-nodejs-with-name](https://i.ibb.co/D5TD86w/logo-nodejs-with-name.png)
+    ![logo-git-with-name](https://i.ibb.co/tP1TFhF/logo-git-with-name.png)
+    ![logo-postman-with-name](https://i.ibb.co/10jtWC2/logo-postman-with-name.png)
+    ![logo-sublime-text-3-with-name](https://i.ibb.co/fMTbdyZ/logo-sublime-text-3-with-name.png)
 </p>
 
 
