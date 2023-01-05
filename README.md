@@ -126,8 +126,8 @@ This project serves as the backend for my full stack e-commerce site during my c
 	    **`https://capstone-2-bautista.onrender.com/users/cart/remove/:orderId`**
 
 	- As reference, this is the orderId on the user's cart.
-
-	![orderId](/uploads/ddddb1e0a38c8ca78293361046ed0c77/orderId.png)
+	
+	<img src="https://user-images.githubusercontent.com/112933982/210722893-8b5050be-d6a6-45ab-877a-c83ff5731cb0.png" alt="orderId" width="522" height="578"/>
 
 	- The API will provide a message as a response, once operation is successful.
 
@@ -142,7 +142,7 @@ This project serves as the backend for my full stack e-commerce site during my c
 
     - As reference, this is the productOrderId on the user's cart.
 
-    ![productOrderId](/uploads/d51fa1518f1146523f10870d22f49afb/productOrderId.png)
+    <img src="https://user-images.githubusercontent.com/112933982/210723200-abe7a9f8-95e2-4b95-9f3a-125a2a031cfb.png" alt="orderId" width="522" height="578"/>
 
     - The API will provide a message as a response, once operation is successful.
 
